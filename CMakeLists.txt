@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
 project(tripletriad CXX)
+set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG")
 add_subdirectory(src)
 add_subdirectory(tests)
