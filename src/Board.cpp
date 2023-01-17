@@ -106,6 +106,7 @@ void Board::Play(int index, int position){
     if(index < 0 or opponent_card_list.size() <= index) throw std::runtime_error("card index out of range in Play(int, int)\n");
   }
   if(IsOccupied(position)) throw std::runtime_error("The place is already occupied. Play(int, int)\n");
+  if(IsGameEnd()) throw std::runtime_error("The game is end. Play(int, int)\n");
 #endif
 
   enum CardID card_id;
