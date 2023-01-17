@@ -3,6 +3,7 @@
 Board::Board(enum CardID ally_card_list_[5], enum CardID opponent_card_list_[5], Rules rules_, enum Player turn_):
   rules(rules_),
   turn(turn_),
+  sente(turn_),
   num_opponent_cards(0),
   num_ally_cards(0),
   num_unoccupied_positions(9),
@@ -22,6 +23,7 @@ Board::Board(enum CardID ally_card_list_[5], enum CardID opponent_card_list_[5],
 Board::Board(enum CardID ally_card_list_[5], enum CardID opponent_card_list_[5], Rules rules_, enum Player turn_, enum Element element_list_[9]):
   rules(rules_),
   turn(turn_),
+  sente(turn_),
   num_opponent_cards(0),
   num_ally_cards(0),
   num_unoccupied_positions(9),
@@ -78,11 +80,20 @@ enum Player Board::GetWinner(){
     if(num_opponent_cards + num_ally_cards != num_positions) throw std::runtime_error("the sum of the number of the cards is not 9 while game is end.\n");
     if(num_unoccupied_positions != 0) throw std::runtime_error("Unoccupied positions still remain while game is end\n");
 #endif
-    if(num_opponent_cards < num_ally_cards) return Ally;
-    else if(num_ally_cards < num_opponent_cards) return Opponent;
-    else return Unoccupied;
+    if(sente == Ally){
+      if(num_ally_cards > 5) return Ally;
+      else if(num_ally_cards == 5) return Unoccupied;
+      else return Opponent;
+    }
+    else{
+      if(num_opponent_cards > 5) return Opponent;
+      else if(num_opponent_cards == 5) return Unoccupied;
+      else return Ally;
+    }
   }
-  else return Unoccupied;
+  else{
+    return Unoccupied;
+  }
 }
 
 Card& Board::GetCard(int position){

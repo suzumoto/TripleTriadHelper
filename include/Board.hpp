@@ -18,11 +18,12 @@ private:
   enum Player red_or_blue[9];
   enum CardID card_list[9];
   enum Player turn;
+  enum Player sente;
   int num_opponent_cards;
   int num_ally_cards;
   int num_unoccupied_positions;
   bool is_game_end;
-
+  
   const int num_total_cards = 5;
   std::vector<enum CardID> ally_card_list;
   std::vector<enum CardID> opponent_card_list;
