@@ -47,6 +47,8 @@ protected:
   bool IsEnableSame();
   bool IsEnablePlus();
   bool IsEnableWallSame();
+  bool IsEnableElemental();
+  int CorElement(Card& card, int position);
   bool IsUpFlip(Card& card, int position);
   bool IsDownFlip(Card& card, int position);
   bool IsRightFlip(Card& card, int position);

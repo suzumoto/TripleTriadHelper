@@ -330,18 +330,36 @@ bool Board::IsEnableWallSame(){
   return rules.IsEnableWallSame();
 }
 
+bool Board::IsEnableElemental(){
+  return rules.IsEnableElemental();
+}
+
+int Board::CorElement(Card& card, int position){
+#ifndef NDEBUG
+  if(position < 0 or 9 < position) throw std::runtime_error("position out of range in CorElement(card&, int)\n");
+#endif
+  if(!IsEnableElemental()) return 0;
+  if(GetElement(position) == None) return 0;
+  if(card.GetElement() == None) return 0;
+  if(GetElement(position) == card.GetElement()) return 1;
+  return -1;
+}
+
 bool Board::IsUpFlip(Card& card, int position){
 #ifndef NDEBUG
   if(position < 0 or 9 < position) throw std::runtime_error("position out of range in IsUpFlip(Card&, int)\n");
 #endif
   if(position <= 2) return false;
 
-  int up_postion = position - 3;
-  if(!IsOccupied(up_postion)) return false;
-  if(red_or_blue[up_postion] == turn) return false;
+  int up_position = position - 3;
+  if(!IsOccupied(up_position)) return false;
+  if(red_or_blue[up_position] == turn) return false;
 
-  Card& up_card = GetCard(up_postion);
-  if(up_card.GetDown() < card.GetUp()) return true;
+  Card& up_card = GetCard(up_position);
+  int up_element_mod = CorElement(up_card, up_position);
+  int this_element_mod = CorElement(card, position);
+  
+  if(up_card.GetDown() + up_element_mod < card.GetUp() + this_element_mod) return true;
   return false;
 }
 
@@ -351,12 +369,15 @@ bool Board::IsDownFlip(Card& card, int position){
 #endif
   if(position >= 6) return false;
 
-  int down_postion = position + 3;
-  if(!IsOccupied(down_postion)) return false;
-  if(red_or_blue[down_postion] == turn) return false;
+  int down_position = position + 3;
+  if(!IsOccupied(down_position)) return false;
+  if(red_or_blue[down_position] == turn) return false;
+ 
+  Card& down_card = GetCard(down_position);
+  int down_element_mod = CorElement(down_card, down_position);
+  int this_element_mod = CorElement(card, position);
 
-  Card& down_card = GetCard(down_postion);
-  if(down_card.GetUp() < card.GetDown()) return true;
+  if(down_card.GetUp() + down_element_mod < card.GetDown() + this_element_mod) return true;
   return false;
 }
 
@@ -366,12 +387,15 @@ bool Board::IsLeftFlip(Card& card, int position){
 #endif
   if(position % 3 == 0) return false;
 
-  int left_postion = position - 1;
-  if(!IsOccupied(left_postion)) return false;
-  if(red_or_blue[left_postion] == turn) return false;
+  int left_position = position - 1;
+  if(!IsOccupied(left_position)) return false;
+  if(red_or_blue[left_position] == turn) return false;
   
-  Card& left_card = GetCard(left_postion);
-  if(left_card.GetRight() < card.GetLeft()) return true;
+  Card& left_card = GetCard(left_position);
+  int left_element_mod = CorElement(left_card, left_position);
+  int this_element_mod = CorElement(card, position);
+
+  if(left_card.GetRight() + left_element_mod < card.GetLeft() + this_element_mod) return true;
   return false;
 }
 
@@ -382,12 +406,15 @@ bool Board::IsRightFlip(Card& card, int position){
 #endif
   if(position % 3 == 2) return false;
 
-  int right_postion = position + 1;
-  if(!IsOccupied(right_postion)) return false;
-  if(red_or_blue[right_postion] == turn) return false;
+  int right_position = position + 1;
+  if(!IsOccupied(right_position)) return false;
+  if(red_or_blue[right_position] == turn) return false;
   
-  Card& right_card = GetCard(right_postion);
-  if(right_card.GetLeft() < card.GetRight()) return true;
+  Card& right_card = GetCard(right_position);
+  int right_element_mod = CorElement(right_card, right_position);
+  int this_element_mod = CorElement(card, position);
+
+  if(right_card.GetLeft() + right_element_mod < card.GetRight() + this_element_mod) return true;
   return false;
 }
 
