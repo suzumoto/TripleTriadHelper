@@ -5,3 +5,5 @@ build
 *.cmake
 Makefile
 CMakeFiles
+CMakeCache.txt
+*.a
