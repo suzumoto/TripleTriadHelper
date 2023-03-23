@@ -131,13 +131,23 @@ void Board::Play(int index, int position){
   Card& card = card_data[card_id];
 
   bool special_flip = false;
-  if(IsEnableSame()){
+  if(IsEnableSame()){ // includes wall-same procedures
+    int same_flag = SameFlag(card, position);
+    special_flip = same_flag;
+    CascadeWithFlag(position, same_flag);
   }
   if(IsEnablePlus()){
-  }
-  if(IsEnableWallSame()){
+    int plus_flag = PlusFlag(card, position);
+    special_flip = (special_flip and plus_flag);
+    CascadeWithFlag(position, plus_flag);
   }
   if(!special_flip) NormalFlip(card, position);
+  else{
+    if(IsUpFlip(card, position)) CascadeFlip(position - 3);
+    if(IsDownFlip(card, position)) CascadeFlip(position + 3);
+    if(IsRightFlip(card, position)) CascadeFlip(position + 1);
+    if(IsLeftFlip(card, position)) CascadeFlip(position - 1);
+  }
   if(turn == Ally) ++num_ally_cards;
   else ++num_opponent_cards;
   --num_unoccupied_positions;
@@ -155,7 +165,7 @@ void Board::Play(int index, int position){
   }
 }
 
-char int_to_char(int num){
+static char int_to_char(int num){
   char char_num;
   if(num == 10) char_num = 'A';
   else char_num = '0' + num;
@@ -513,3 +523,209 @@ void Board::NormalFlip(Card& card, int position){
   if(IsRightFlip(card, position)) RightFlip(position);
   if(IsLeftFlip(card, position)) LeftFlip(position);
 }
+
+void Board::CascadeFlip(int position){
+  if(position < 0 or 9 < position) return;
+  if(!IsOccupied(position)) return;
+  if(red_or_blue[position] == turn) return;
+  
+  red_or_blue[position] = turn;
+  if(turn == Ally){
+    --num_opponent_cards;
+    ++num_ally_cards;
+  } else{
+    --num_ally_cards;
+    ++num_opponent_cards;
+  }
+  
+  Card& card = GetCard(position);
+  if(IsUpFlip(card, position)) CascadeFlip(position - 3);
+  if(IsDownFlip(card, position)) CascadeFlip(position + 3);
+  if(IsLeftFlip(card, position)) CascadeFlip(position - 1);
+  if(IsRightFlip(card, position)) CascadeFlip(position + 1);
+}
+
+void Board::CascadeWithFlag(int position, int cascade_flag){
+  switch(cascade_flag){
+  case 0: // no same
+    break;
+  case 1: // up-right
+    CascadeFlip(position - 3);
+    CascadeFlip(position + 1);
+    break;
+  case 2:  // right-down
+    CascadeFlip(position + 1);
+    CascadeFlip(position + 3);
+    break;
+  case 3:  // down-left
+    CascadeFlip(position + 3);
+    CascadeFlip(position - 1);
+    break;
+  case 4:  // left-up
+    CascadeFlip(position - 1);
+    CascadeFlip(position - 3);
+    break;
+  case 5:  // up-down
+    CascadeFlip(position - 3);
+    CascadeFlip(position + 3);
+    break;
+  case 6:  // right-left
+    CascadeFlip(position + 1);
+    CascadeFlip(position - 1);
+    break;
+  case 7:  // up-right-down
+    CascadeFlip(position - 3);
+    CascadeFlip(position + 1);
+    CascadeFlip(position + 3);
+    break;
+  case 8:  // right-down-left
+    CascadeFlip(position + 1);
+    CascadeFlip(position + 3);
+    CascadeFlip(position - 1);
+    break;
+  case 9:  // down-left-up
+    CascadeFlip(position + 3);
+    CascadeFlip(position - 1);
+    CascadeFlip(position - 3);
+    break;
+  case 10: // left-up-right
+    CascadeFlip(position - 1);
+    CascadeFlip(position - 3);
+    CascadeFlip(position + 1);
+    break;
+  case 11: // all
+    CascadeFlip(position - 3);
+    CascadeFlip(position - 1);
+    CascadeFlip(position + 1);
+    CascadeFlip(position + 3);
+    break;
+  default: // never reached
+#ifndef NDEBUG
+    throw std::runtime_error("Never Reached Case in CascadeWithFlip");
+#endif
+    break;
+  }
+}
+
+
+
+int Board::SameFlag(Card& card, int position){
+#ifndef NDEBUG
+  if(position < 0 or 9 < position) throw std::runtime_error("position out of range in SameFlag(Card&, int)\n");
+#endif
+  if(!IsEnableSame()) return 0;
+  int up_card_num = 0;
+  int down_card_num = 0;
+  int right_card_num = 0;
+  int left_card_num = 0;
+
+  if(position > 2){
+    if(IsOccupied(position - 3))
+      up_card_num = GetCard(position - 3).GetDown();
+  }
+  else if(IsEnableWallSame())
+    up_card_num = 10;
+
+  if(position < 6){
+    if(IsOccupied(position + 3))
+      down_card_num = GetCard(position + 3).GetUp();
+  }
+  else if(IsEnableWallSame())
+    down_card_num = 10;
+
+  if(position % 3 != 2){
+    if(IsOccupied(position + 1))
+      right_card_num = GetCard(position + 1).GetLeft();
+  }
+  else if(IsEnableWallSame())
+    right_card_num = 10;
+
+  if(position % 3 != 0){
+    if(IsOccupied(position - 1))
+      left_card_num = GetCard(position - 1).GetRight();
+  }
+  else if(IsEnableWallSame())
+    left_card_num = 10;
+
+  bool up_same    = (up_card_num == card.GetUp());
+  bool right_same = (right_card_num == card.GetRight());
+  bool left_same  = (left_card_num == card.GetLeft());
+  bool down_same  = (down_card_num == card.GetDown());
+
+  if(up_same and right_same and left_same and down_same)
+    return 11;
+  if(left_same and up_same and right_same)
+    return 10;
+  if(down_same and left_same and up_same)
+    return 9;
+  if(right_same and down_same and left_same)
+    return 8;
+  if(up_same and right_same and down_same)
+    return 7;
+  if(right_same and left_same)
+    return 6;
+  if(up_same and down_same)
+    return 5;
+  if(left_same and up_same)
+    return 4;
+  if(down_same and left_same)
+    return 3;
+  if(right_same and down_same)
+    return 2;
+  if(up_same and right_same)
+    return 1;
+  return 0;
+}
+
+int Board::PlusFlag(Card& card, int position){
+#ifndef NDEBUG
+  if(position < 0 or 9 < position) throw std::runtime_error("position out of range in PlusFlag(Card&, int)\n");
+#endif
+  if(!IsEnablePlus()) return 0;
+  int up_card_num = 0;
+  int down_card_num = 0;
+  int right_card_num = 0;
+  int left_card_num = 0;
+
+  if(position > 2 and IsOccupied(position - 3))
+    up_card_num = GetCard(position - 3).GetDown();
+
+  if(position < 6 and IsOccupied(position + 3))
+    down_card_num = GetCard(position + 3).GetUp();
+
+  if(position % 3 != 2 and IsOccupied(position + 1))
+    right_card_num = GetCard(position + 1).GetLeft();
+
+  if(position % 3 != 0 and IsOccupied(position - 1))
+    left_card_num = GetCard(position - 1).GetRight();
+  
+  int up_sum    = up_card_num + card.GetUp();
+  int down_sum  = down_card_num + card.GetDown();
+  int right_sum = right_card_num + card.GetRight();
+  int left_sum  = left_card_num + card.GetLeft();
+
+  if(up_sum == down_sum and down_sum == right_sum and right_sum == left_sum)
+    return 11;
+  if(left_sum == up_sum and up_sum == right_sum)
+    return 10;
+  if(down_sum == left_sum and left_sum == up_sum)
+    return 9;
+  if(right_sum == down_sum and down_sum == left_sum)
+    return 8;
+  if(up_sum == right_sum and right_sum == down_sum)
+    return 7;
+  if(right_sum == left_sum)
+    return 6;
+  if(up_sum == down_sum)
+    return 5;
+  if(left_sum == up_sum)
+    return 4;
+  if(down_sum == left_sum)
+    return 3;
+  if(right_sum == down_sum)
+    return 2;
+  if(up_sum == right_sum)
+    return 1;
+  return 0;
+}
+

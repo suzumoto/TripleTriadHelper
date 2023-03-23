@@ -58,5 +58,10 @@ protected:
   void RightFlip(int position);
   void LeftFlip(int position);
   void NormalFlip(Card& card, int position);
+  void CascadeFlip(int position);
+  void CascadeWithFlag(int position, int cascade_flag);
+  int SameFlag(Card& card, int position); // 0 (no same), 1(up-right) 2(right-down), 3(down-left), 4(left-up),
+                                          // 5 (up-down), 6(right-left), 7(up-right-down), 8(right-down-left),
+                                          // 9 (down-left-up), 10 (left-up-right), 11(all)
+  int PlusFlag(Card& card, int position);
 };
-
