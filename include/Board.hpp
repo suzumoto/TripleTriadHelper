@@ -33,35 +33,36 @@ public:
   Board(enum CardID ally_card_list[5], enum CardID opponent_card_list[5], Rules, enum Player turn, enum Element element_list[9]);
   ~Board(){};
   void SetElement(enum Element el, int position);
-  enum Element GetElement(int position);
-  bool IsOccupied(int position);
-  bool IsGameEnd();
-  enum Player GetTurnPlayer();
-  enum Player GetWinner();
-  Card& GetCard(int position);
+  enum Element GetElement(int position) const;
+  bool IsOccupied(int position) const;
+  bool IsGameEnd() const;
+  enum Player GetTurnPlayer() const;
+  enum Player GetWinner() const;
+  const Card& GetCard(int position) const;
   void SetTurn(enum Player player);
   void Play(int index, int position);
-  friend std::ostream& operator<<(std::ostream& os, Board& board);
+  friend std::ostream& operator<<(std::ostream& os, const Board& board);
+  friend bool operator==(const Board& rhs, const Board& lhs);
   
 protected:
-  bool IsEnableSame();
-  bool IsEnablePlus();
-  bool IsEnableWallSame();
-  bool IsEnableElemental();
-  int CorElement(Card& card, int position);
-  bool IsUpFlip(Card& card, int position);
-  bool IsDownFlip(Card& card, int position);
-  bool IsRightFlip(Card& card, int position);
-  bool IsLeftFlip(Card& card, int position);
+  bool IsEnableSame() const;
+  bool IsEnablePlus() const;
+  bool IsEnableWallSame() const;
+  bool IsEnableElemental() const;
+  int CorElement(const Card& card, int position) const;
+  bool IsUpFlip(const Card& card, int position) const;
+  bool IsDownFlip(const Card& card, int position) const;
+  bool IsRightFlip(const Card& card, int position) const;
+  bool IsLeftFlip(const Card& card, int position) const;
   void UpFlip(int position);
   void DownFlip(int position);
   void RightFlip(int position);
   void LeftFlip(int position);
-  void NormalFlip(Card& card, int position);
+  void NormalFlip(const Card& card, int position);
   void CascadeFlip(int position);
   void CascadeWithFlag(int position, int cascade_flag);
-  int SameFlag(Card& card, int position); // 0 (no same), 1(up-right) 2(right-down), 3(down-left), 4(left-up),
+  int SameFlag(const Card& card, int position) const; // 0 (no same), 1(up-right) 2(right-down), 3(down-left), 4(left-up),
                                           // 5 (up-down), 6(right-left), 7(up-right-down), 8(right-down-left),
                                           // 9 (down-left-up), 10 (left-up-right), 11(all)
-  int PlusFlag(Card& card, int position);
+  int PlusFlag(const Card& card, int position) const;
 };

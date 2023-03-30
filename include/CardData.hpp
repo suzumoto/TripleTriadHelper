@@ -169,4 +169,5 @@ public:
   CardData();
   ~CardData(){};
   Card& operator[](const enum CardID& id);
+  const Card& operator[](const enum CardID& id) const;
 };

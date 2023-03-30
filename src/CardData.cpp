@@ -170,3 +170,17 @@ Card& CardData::operator[](const enum CardID& id){
   index = (q-1) * 11 + r - 1;
   return card_list[index];
 }
+
+
+const Card& CardData::operator[](const enum CardID& id) const{
+  int index = (int)id;
+  int r = index % 100;
+  int q = index / 100;
+#ifndef NDEBUG
+  if(r <= 0 or r >= 12) throw std::runtime_error("rem out of range\n");
+  if(q <= -1 or q >= 11) throw std::runtime_error("quo out of range\n");
+#endif
+  index = (q-1) * 11 + r - 1;
+  return card_list[index];
+}
+

@@ -47,14 +47,14 @@ void Board::SetElement(enum Element el, int position){
   element_list[position] = el;
 }
 
-enum Element Board::GetElement(int position){
+enum Element Board::GetElement(int position) const{
 #ifndef NDEBUG
   if(position < 0 or 9 < position) throw std::runtime_error("position out of range\n");
 #endif
   return element_list[position];
 }
 
-bool Board::IsOccupied(int position){
+bool Board::IsOccupied(int position) const{
 #ifndef NDEBUG
   if(position < 0 or 9 < position) throw std::runtime_error("position out of range\n");
   if(red_or_blue[position] != Unoccupied and card_list[position] == NullCard) throw std::runtime_error("card information conflicted\n");
@@ -63,18 +63,18 @@ bool Board::IsOccupied(int position){
   return (red_or_blue[position] != Unoccupied);
 }
 
-bool Board::IsGameEnd(){
+bool Board::IsGameEnd() const{
   return is_game_end;
 }
 
-enum Player Board::GetTurnPlayer(){
+enum Player Board::GetTurnPlayer() const{
 #ifndef NDEBUG
   if(turn == Unoccupied) throw std::runtime_error("turn unoccupied\n");
 #endif
   return turn;
 }
 
-enum Player Board::GetWinner(){
+enum Player Board::GetWinner() const{
   if(is_game_end){
 #ifndef NDEBUG
     if(num_opponent_cards + num_ally_cards != num_positions) throw std::runtime_error("the sum of the number of the cards is not 9 while game is end.\n");
@@ -96,7 +96,7 @@ enum Player Board::GetWinner(){
   }
 }
 
-Card& Board::GetCard(int position){
+const Card& Board::GetCard(int position) const{
 #ifndef NDEBUG
   if(position < 0 or 9 < position) throw std::runtime_error("position out of range in GetCard(int)\n");
 #endif
@@ -128,7 +128,7 @@ void Board::Play(int index, int position){
   if(card_id == NullCard) throw std::runtime_error("Null card played in Play(int, int)\n");
 #endif
   
-  Card& card = card_data[card_id];
+  const Card& card = card_data[card_id];
 
   bool special_flip = false;
   if(IsEnableSame()){ // includes wall-same procedures
@@ -172,7 +172,7 @@ static char int_to_char(int num){
   return char_num;
 }
 
-std::ostream& operator<<(std::ostream& os, Board& board){
+std::ostream& operator<<(std::ostream& os, const Board& board){
   if(board.IsGameEnd())
     os << " Turn: End " << std::endl;
   else if(board.turn == Ally)
@@ -328,23 +328,27 @@ std::ostream& operator<<(std::ostream& os, Board& board){
   return os << std::endl;
 }
 
-bool Board::IsEnableSame(){
+bool operator==(const Board& rhs, const Board& lhs){
+  return true;
+}
+
+bool Board::IsEnableSame() const{
   return rules.IsEnableSame();
 }
 
-bool Board::IsEnablePlus(){
+bool Board::IsEnablePlus() const{
   return rules.IsEnablePlus();
 }
 
-bool Board::IsEnableWallSame(){
+bool Board::IsEnableWallSame() const{
   return rules.IsEnableWallSame();
 }
 
-bool Board::IsEnableElemental(){
+bool Board::IsEnableElemental() const{
   return rules.IsEnableElemental();
 }
 
-int Board::CorElement(Card& card, int position){
+int Board::CorElement(const Card& card, int position) const{
 #ifndef NDEBUG
   if(position < 0 or 9 < position) throw std::runtime_error("position out of range in CorElement(card&, int)\n");
 #endif
@@ -355,7 +359,7 @@ int Board::CorElement(Card& card, int position){
   return -1;
 }
 
-bool Board::IsUpFlip(Card& card, int position){
+bool Board::IsUpFlip(const Card& card, int position) const{
 #ifndef NDEBUG
   if(position < 0 or 9 < position) throw std::runtime_error("position out of range in IsUpFlip(Card&, int)\n");
 #endif
@@ -365,7 +369,7 @@ bool Board::IsUpFlip(Card& card, int position){
   if(!IsOccupied(up_position)) return false;
   if(red_or_blue[up_position] == turn) return false;
 
-  Card& up_card = GetCard(up_position);
+  const Card& up_card = GetCard(up_position);
   int up_element_mod = CorElement(up_card, up_position);
   int this_element_mod = CorElement(card, position);
   
@@ -373,7 +377,7 @@ bool Board::IsUpFlip(Card& card, int position){
   return false;
 }
 
-bool Board::IsDownFlip(Card& card, int position){
+bool Board::IsDownFlip(const Card& card, int position) const{
 #ifndef NDEBUG
   if(position < 0 or 9 < position) throw std::runtime_error("position out of range in IsDownFlip(Card&, int)\n");
 #endif
@@ -383,7 +387,7 @@ bool Board::IsDownFlip(Card& card, int position){
   if(!IsOccupied(down_position)) return false;
   if(red_or_blue[down_position] == turn) return false;
  
-  Card& down_card = GetCard(down_position);
+  const Card& down_card = GetCard(down_position);
   int down_element_mod = CorElement(down_card, down_position);
   int this_element_mod = CorElement(card, position);
 
@@ -391,7 +395,7 @@ bool Board::IsDownFlip(Card& card, int position){
   return false;
 }
 
-bool Board::IsLeftFlip(Card& card, int position){
+bool Board::IsLeftFlip(const Card& card, int position) const{
 #ifndef NDEBUG
   if(position < 0 or 9 < position) throw std::runtime_error("position out of range in IsLeftFlip(Card&, int)\n");
 #endif
@@ -401,7 +405,7 @@ bool Board::IsLeftFlip(Card& card, int position){
   if(!IsOccupied(left_position)) return false;
   if(red_or_blue[left_position] == turn) return false;
   
-  Card& left_card = GetCard(left_position);
+  const Card& left_card = GetCard(left_position);
   int left_element_mod = CorElement(left_card, left_position);
   int this_element_mod = CorElement(card, position);
 
@@ -410,7 +414,7 @@ bool Board::IsLeftFlip(Card& card, int position){
 }
 
 
-bool Board::IsRightFlip(Card& card, int position){
+bool Board::IsRightFlip(const Card& card, int position) const{
 #ifndef NDEBUG
   if(position < 0 or 9 < position) throw std::runtime_error("position out of range in IsRightFlip(Card&, int)\n");
 #endif
@@ -420,7 +424,7 @@ bool Board::IsRightFlip(Card& card, int position){
   if(!IsOccupied(right_position)) return false;
   if(red_or_blue[right_position] == turn) return false;
   
-  Card& right_card = GetCard(right_position);
+  const Card& right_card = GetCard(right_position);
   int right_element_mod = CorElement(right_card, right_position);
   int this_element_mod = CorElement(card, position);
 
@@ -514,7 +518,7 @@ void Board::LeftFlip(int position){
   }
 }
 
-void Board::NormalFlip(Card& card, int position){
+void Board::NormalFlip(const Card& card, int position){
 #ifndef NDEBUG
   if(position < 0 or 9 < position) throw std::runtime_error("position out of range in NormalFlip(Card&, int)\n");
 #endif
@@ -538,7 +542,7 @@ void Board::CascadeFlip(int position){
     ++num_opponent_cards;
   }
   
-  Card& card = GetCard(position);
+  const Card& card = GetCard(position);
   if(IsUpFlip(card, position)) CascadeFlip(position - 3);
   if(IsDownFlip(card, position)) CascadeFlip(position + 3);
   if(IsLeftFlip(card, position)) CascadeFlip(position - 1);
@@ -609,7 +613,7 @@ void Board::CascadeWithFlag(int position, int cascade_flag){
 
 
 
-int Board::SameFlag(Card& card, int position){
+int Board::SameFlag(const Card& card, int position) const{
 #ifndef NDEBUG
   if(position < 0 or 9 < position) throw std::runtime_error("position out of range in SameFlag(Card&, int)\n");
 #endif
@@ -677,7 +681,7 @@ int Board::SameFlag(Card& card, int position){
   return 0;
 }
 
-int Board::PlusFlag(Card& card, int position){
+int Board::PlusFlag(const Card& card, int position) const{
 #ifndef NDEBUG
   if(position < 0 or 9 < position) throw std::runtime_error("position out of range in PlusFlag(Card&, int)\n");
 #endif
