@@ -41,8 +41,10 @@ public:
   const Card& GetCard(int position) const;
   void SetTurn(enum Player player);
   void Play(int index, int position);
+  void ForceCardOnBoard(enum Player srcPlayer, int index, int position, enum Player dstPlayer);
   friend std::ostream& operator<<(std::ostream& os, const Board& board);
   friend bool operator==(const Board& rhs, const Board& lhs);
+  friend bool operator!=(const Board& rhs, const Board& lhs){return !(rhs == lhs);}
   
 protected:
   bool IsEnableSame() const;
@@ -61,8 +63,9 @@ protected:
   void NormalFlip(const Card& card, int position);
   void CascadeFlip(int position);
   void CascadeWithFlag(int position, int cascade_flag);
-  int SameFlag(const Card& card, int position) const; // 0 (no same), 1(up-right) 2(right-down), 3(down-left), 4(left-up),
-                                          // 5 (up-down), 6(right-left), 7(up-right-down), 8(right-down-left),
-                                          // 9 (down-left-up), 10 (left-up-right), 11(all)
+  int SameFlag(const Card& card, int position) const;
+      /* 0 (no same), 1(up-right) 2(right-down), 3(down-left), 4(left-up),
+	 5 (up-down), 6(right-left), 7(up-right-down), 8(right-down-left),
+         9 (down-left-up), 10 (left-up-right), 11(all) */
   int PlusFlag(const Card& card, int position) const;
 };

@@ -90,3 +90,15 @@ void Rules::DisableElemental(){
   if(enable_list[ELEMENTAL]) --num_enable_rules;
   enable_list[ELEMENTAL] = false;
 }
+
+bool operator==(const Rules& rhs, const Rules& lhs){
+  if(rhs.num_enable_rules != lhs.num_enable_rules) return false;
+  for(int i = 0; i < rhs.num_total_rules; ++i){
+    if(rhs.enable_list[i] != lhs.enable_list[i]) return false;
+  }
+  return true;
+}
+
+bool operator!=(const Rules& rhs, const Rules& lhs){
+  return !(rhs == lhs);
+}

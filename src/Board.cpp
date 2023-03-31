@@ -165,6 +165,10 @@ void Board::Play(int index, int position){
   }
 }
 
+void Board::ForceCardOnBoard(enum Player srcPlayer, int index, int position, enum Player dstPlayer){
+  
+}
+
 static char int_to_char(int num){
   char char_num;
   if(num == 10) char_num = 'A';
@@ -173,6 +177,7 @@ static char int_to_char(int num){
 }
 
 std::ostream& operator<<(std::ostream& os, const Board& board){
+  os << std::endl;
   if(board.IsGameEnd())
     os << " Turn: End " << std::endl;
   else if(board.turn == Ally)
@@ -329,6 +334,26 @@ std::ostream& operator<<(std::ostream& os, const Board& board){
 }
 
 bool operator==(const Board& rhs, const Board& lhs){
+  if(rhs.rules != lhs.rules) return false;
+  for(int i = 0; i < rhs.num_positions; ++i){
+    if(rhs.element_list[i] != lhs.element_list[i]) return false;
+    if(rhs.red_or_blue[i] != lhs.red_or_blue[i]) return false;
+    if(rhs.card_list[i] != lhs.card_list[i]) return false;
+  }
+  if(rhs.turn != lhs.turn) return false;
+  if(rhs.sente != lhs.sente) return false;
+  if(rhs.num_opponent_cards != lhs.num_opponent_cards) return false;
+  if(rhs.num_ally_cards != lhs.num_ally_cards) return false;
+  if(rhs.num_unoccupied_positions != lhs.num_unoccupied_positions) return false;
+  if(rhs.is_game_end != lhs.is_game_end) return false;
+  if(rhs.ally_card_list.size() != lhs.ally_card_list.size()) return false;
+  if(rhs.opponent_card_list.size() != lhs.opponent_card_list.size()) return false;
+  for(int i = 0; i < rhs.ally_card_list.size(); ++i){
+    if(rhs.ally_card_list[i] != lhs.ally_card_list[i]) return false;
+  }
+  for(int i = 0; i < rhs.opponent_card_list.size(); ++i){
+    if(rhs.opponent_card_list[i] != lhs.opponent_card_list[i]) return false;
+  }
   return true;
 }
 

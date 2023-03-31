@@ -45,4 +45,7 @@ public:
   bool IsEnableElemental() const{return enable_list[ELEMENTAL];}
   
   int GetNumEnableRules() const{return num_enable_rules;}
+
+  friend bool operator==(const Rules& rhs, const Rules& lhs);
+  friend bool operator!=(const Rules& rhs, const Rules& lhs);
 };
