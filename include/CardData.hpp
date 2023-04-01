@@ -158,7 +158,7 @@ public:
   int GetLeft() const{return left;}
   int GetRight() const{return right;}
 
-  friend std::ostream& operator<<(std::ostream& os, Card& card);
+  friend std::ostream& operator<<(std::ostream& os, const Card& card);
 };
 
 class CardData{

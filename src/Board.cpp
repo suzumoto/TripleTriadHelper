@@ -166,7 +166,27 @@ void Board::Play(int index, int position){
 }
 
 void Board::ForceCardOnBoard(enum Player srcPlayer, int index, int position, enum Player dstPlayer){
-  
+#ifndef NDEBUG
+  if(position < 0 or position > 9) throw std::runtime_error("Position out of range, in ForceCardOnBoard(Player, int, int, Player)");
+  if(srcPlayer == Ally)
+    if(index < 0 or ally_card_list.size() <= index) throw std::runtime_error("index out of range, in ForceCardOnBoard(Player, int, int, Player)");
+  if(srcPlayer == Opponent)
+    if(index < 0 or opponent_card_list.size() <= index) throw std::runtime_error("index out of range, in ForceCardOnBoard(Player, int, int, Player)");
+  if(red_or_blue[position] != Unoccupied) throw std::runtime_error("Position already occupied, in ForceCardOnBoard(Player, int, int, Player)");
+#endif
+  red_or_blue[position] = dstPlayer;
+  if(srcPlayer == Ally){
+    card_list[position] = ally_card_list[index];
+    ally_card_list.erase(ally_card_list.begin() + index);
+  }
+  if(srcPlayer == Opponent){
+    card_list[position] = opponent_card_list[index];
+    opponent_card_list.erase(opponent_card_list.begin() + index);
+  }
+  if(dstPlayer == Ally) ++num_ally_cards;
+  if(dstPlayer == Opponent) ++num_opponent_cards;
+  --num_unoccupied_positions;
+  if(num_unoccupied_positions == 0) is_game_end = true;
 }
 
 static char int_to_char(int num){
@@ -557,7 +577,7 @@ void Board::CascadeFlip(int position){
   if(position < 0 or 9 < position) return;
   if(!IsOccupied(position)) return;
   if(red_or_blue[position] == turn) return;
-  
+
   red_or_blue[position] = turn;
   if(turn == Ally){
     --num_opponent_cards;

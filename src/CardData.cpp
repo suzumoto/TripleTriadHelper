@@ -34,7 +34,7 @@ Card::Card(enum CardID id_, int up_, int right_, int down_, int left_, enum Elem
   left = left_;
 }
 
-std::ostream& operator<<(std::ostream& os, Card& card){
+std::ostream& operator<<(std::ostream& os, const Card& card){
   os << card.id << " "
      << card.element << " "
      << card.up << " "
