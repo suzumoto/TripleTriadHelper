@@ -386,7 +386,7 @@ bool Board::IsEnablePlus() const{
 }
 
 bool Board::IsEnableWallSame() const{
-  return rules.IsEnableWallSame();
+  return rules.IsEnableWallSame() and rules.IsEnableSame();
 }
 
 bool Board::IsEnableElemental() const{
