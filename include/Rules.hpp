@@ -19,6 +19,7 @@ public:
   Rules();
   Rules(bool open, bool sudden_death, bool random_hand, bool same,
 	bool plus, bool wall_same, bool elemental);
+  Rules(const Rules& rules);
   ~Rules(){};
   void EnableOpen();
   void EnableSuddenDeath();

@@ -1,4 +1,5 @@
 #include <Board.hpp>
+#include <string>
 
 Board::Board(enum CardID ally_card_list_[5], enum CardID opponent_card_list_[5], Rules rules_, enum Player turn_):
   rules(rules_),
@@ -40,23 +41,45 @@ Board::Board(enum CardID ally_card_list_[5], enum CardID opponent_card_list_[5],
   }
 }
 
+Board::Board(const Board& board):
+  rules(board.rules),
+  turn(board.turn),
+  sente(board.turn),
+  num_opponent_cards(board.num_opponent_cards),
+  num_ally_cards(board.num_ally_cards),
+  num_unoccupied_positions(board.num_unoccupied_positions),
+  is_game_end(board.is_game_end),
+  ally_card_list(board.ally_card_list),
+  opponent_card_list(board.opponent_card_list)
+{
+  for(int i = 0; i < num_positions; ++i){
+    element_list[i] = board.element_list[i];
+    red_or_blue[i] = board.red_or_blue[i];
+    card_list[i] = board.card_list[i];
+  }
+}
+
 void Board::SetElement(enum Element el, int position){
 #ifndef NDEBUG
-  if(position < 0 or 9 < position) throw std::runtime_error("position out of range\n");
+  if(position < 0 or 8 < position) throw std::runtime_error("position out of range in SetElement");
 #endif
   element_list[position] = el;
 }
 
 enum Element Board::GetElement(int position) const{
 #ifndef NDEBUG
-  if(position < 0 or 9 < position) throw std::runtime_error("position out of range\n");
+  if(position < 0 or 8 < position) throw std::runtime_error("position out of range in GetElement");
 #endif
   return element_list[position];
 }
 
 bool Board::IsOccupied(int position) const{
 #ifndef NDEBUG
-  if(position < 0 or 9 < position) throw std::runtime_error("position out of range\n");
+  if(position < 0 or 8 < position){
+    std::string msg("position out of range in IsOccupied, position = ");
+    msg += std::to_string(position);
+    throw std::runtime_error(msg);
+  }
   if(red_or_blue[position] != Unoccupied and card_list[position] == NullCard) throw std::runtime_error("card information conflicted\n");
   if(red_or_blue[position] == Unoccupied and card_list[position] != NullCard) throw std::runtime_error("card information conflicted\n");
 #endif
@@ -72,6 +95,12 @@ enum Player Board::GetTurnPlayer() const{
   if(turn == Unoccupied) throw std::runtime_error("turn unoccupied\n");
 #endif
   return turn;
+}
+
+const std::vector<enum CardID>& Board::GetTurnPlayerCardList() const{
+  if(GetTurnPlayer() == Ally)
+    return ally_card_list;
+  else return opponent_card_list;
 }
 
 enum Player Board::GetWinner() const{
@@ -98,7 +127,7 @@ enum Player Board::GetWinner() const{
 
 const Card& Board::GetCard(int position) const{
 #ifndef NDEBUG
-  if(position < 0 or 9 < position) throw std::runtime_error("position out of range in GetCard(int)\n");
+  if(position < 0 or 8 < position) throw std::runtime_error("position out of range in GetCard(int)\n");
 #endif
   return card_data[card_list[position]];
 }
@@ -109,14 +138,24 @@ void Board::SetTurn(enum Player player){
 
 void Board::Play(int index, int position){
 #ifndef NDEBUG
-  if(position < 0 or 9 < position) throw std::runtime_error("position out of range in Play(int, int)\n");
+  if(position < 0 or 8 < position) throw std::runtime_error("position out of range in Play(int, int)\n");
   if(turn == Ally){
     if(index < 0 or ally_card_list.size() <= index) throw std::runtime_error("card index out of range in Play(int, int)\n");
   }
   else{
     if(index < 0 or opponent_card_list.size() <= index) throw std::runtime_error("card index out of range in Play(int, int)\n");
   }
-  if(IsOccupied(position)) throw std::runtime_error("The place is already occupied. Play(int, int)\n");
+#ifndef NDEBUG
+  try{
+#endif
+    if(IsOccupied(position)) throw std::runtime_error("The place is already occupied. Play(int, int)\n");
+#ifndef NDEBUG
+  }
+  catch(std::runtime_error& e){
+    std::cout << e.what() << std::endl;
+    throw std::runtime_error("Unexpected Error in Play");
+  }
+#endif
   if(IsGameEnd()) throw std::runtime_error("The game is end. Play(int, int)\n");
 #endif
 
@@ -167,7 +206,7 @@ void Board::Play(int index, int position){
 
 void Board::ForceCardOnBoard(enum Player srcPlayer, int index, int position, enum Player dstPlayer){
 #ifndef NDEBUG
-  if(position < 0 or position > 9) throw std::runtime_error("Position out of range, in ForceCardOnBoard(Player, int, int, Player)");
+  if(position < 0 or position > 8) throw std::runtime_error("Position out of range, in ForceCardOnBoard(Player, int, int, Player)");
   if(srcPlayer == Ally)
     if(index < 0 or ally_card_list.size() <= index) throw std::runtime_error("index out of range, in ForceCardOnBoard(Player, int, int, Player)");
   if(srcPlayer == Opponent)
@@ -187,6 +226,89 @@ void Board::ForceCardOnBoard(enum Player srcPlayer, int index, int position, enu
   if(dstPlayer == Opponent) ++num_opponent_cards;
   --num_unoccupied_positions;
   if(num_unoccupied_positions == 0) is_game_end = true;
+}
+
+int Board::MoveEval(int index, int position) const{
+#ifndef NDEBUG
+  if(IsGameEnd()) throw std::runtime_error("Do not call MoveEval on a final board");
+#endif
+  Board next_board(*this);
+  next_board.Play(index, position);
+  if(next_board.IsGameEnd()){
+    if(next_board.GetWinner() == Unoccupied) return 0; // Draw
+    if(next_board.GetWinner() == GetTurnPlayer()) return 1; // Win
+    else return -1; // Lose
+  }
+  std::vector<int> empty_list;
+#ifndef NDEBUG
+  try{
+#endif
+    for(int i = 0; i < num_positions; ++i){
+      if(!next_board.IsOccupied(i))
+	empty_list.push_back(i);
+    }
+#ifndef NDEBUG
+  }
+  catch(std::runtime_error& e){
+    std::cout << e.what() << std::endl;
+    throw std::runtime_error("Unexpected Error in Move Eval(int, int)");
+  }
+#endif
+  const std::vector<enum CardID>& hand_list = next_board.GetTurnPlayerCardList();
+  int eval_sum = 0;
+  for(int card_index = 0; card_index < hand_list.size(); ++card_index){
+    for(int empty_position: empty_list){
+      int eval = next_board.MoveEval(card_index, empty_position);
+      if(eval == 1)
+	return -1;
+      eval_sum += eval;
+    }
+  }
+  if(-eval_sum == hand_list.size() * empty_list.size())
+    return 1;
+  else return 0;
+}
+
+int Board::MoveEval(int index, int position, long& count) const{
+  ++count;
+#ifndef NDEBUG
+  if(IsGameEnd()) throw std::runtime_error("Do not call MoveEval on a final board");
+#endif
+  Board next_board(*this);
+  next_board.Play(index, position);
+  if(next_board.IsGameEnd()){
+    if(next_board.GetWinner() == Unoccupied) return 0; // Draw
+    if(next_board.GetWinner() == GetTurnPlayer()) return 1; // Win
+    else return -1; // Lose
+  }
+  std::vector<int> empty_list;
+#ifndef NDEBUG
+  try{
+#endif
+    for(int i = 0; i < num_positions; ++i){
+      if(!next_board.IsOccupied(i))
+	empty_list.push_back(i);
+    }
+#ifndef NDEBUG
+  }
+  catch(std::runtime_error& e){
+    std::cerr << e.what() << std::endl;
+    throw std::runtime_error("Unexpected Error in MoveEval(int, int long&)");
+  }
+#endif
+  const std::vector<enum CardID>& hand_list = next_board.GetTurnPlayerCardList();
+  int eval_sum = 0;
+  for(int card_index = 0; card_index < hand_list.size(); ++card_index){
+    for(int empty_position: empty_list){
+      int eval = next_board.MoveEval(card_index, empty_position, count);
+      if(eval == 1)
+	return -1;
+      eval_sum += eval;
+    }
+  }
+  if(-eval_sum == hand_list.size() * empty_list.size())
+    return 1;
+  else return 0;
 }
 
 static char int_to_char(int num){
@@ -395,7 +517,7 @@ bool Board::IsEnableElemental() const{
 
 int Board::CorElement(const Card& card, int position) const{
 #ifndef NDEBUG
-  if(position < 0 or 9 < position) throw std::runtime_error("position out of range in CorElement(card&, int)\n");
+  if(position < 0 or 8 < position) throw std::runtime_error("position out of range in CorElement(card&, int)\n");
 #endif
   if(!IsEnableElemental()) return 0;
   if(GetElement(position) == None) return 0;
@@ -406,12 +528,22 @@ int Board::CorElement(const Card& card, int position) const{
 
 bool Board::IsUpFlip(const Card& card, int position) const{
 #ifndef NDEBUG
-  if(position < 0 or 9 < position) throw std::runtime_error("position out of range in IsUpFlip(Card&, int)\n");
+  if(position < 0 or 8 < position) throw std::runtime_error("position out of range in IsUpFlip(Card&, int)\n");
 #endif
   if(position <= 2) return false;
 
   int up_position = position - 3;
-  if(!IsOccupied(up_position)) return false;
+#ifndef NDEBUG
+  try{
+#endif
+    if(!IsOccupied(up_position)) return false;
+#ifndef NDEBUG
+  }
+  catch(std::runtime_error& e){
+    std::cerr << e.what() << std::endl;
+    throw std::runtime_error("Unexpected Error in IsUpflip");
+  }
+#endif
   if(red_or_blue[up_position] == turn) return false;
 
   const Card& up_card = GetCard(up_position);
@@ -424,12 +556,22 @@ bool Board::IsUpFlip(const Card& card, int position) const{
 
 bool Board::IsDownFlip(const Card& card, int position) const{
 #ifndef NDEBUG
-  if(position < 0 or 9 < position) throw std::runtime_error("position out of range in IsDownFlip(Card&, int)\n");
+  if(position < 0 or 8 < position) throw std::runtime_error("position out of range in IsDownFlip(Card&, int)\n");
 #endif
   if(position >= 6) return false;
 
   int down_position = position + 3;
-  if(!IsOccupied(down_position)) return false;
+#ifndef NDEBUG
+  try{
+#endif
+    if(!IsOccupied(down_position)) return false;
+#ifndef NDEBUG
+  }
+  catch(std::runtime_error& e){
+    std::cout << e.what() << std::endl;
+    throw std::runtime_error("Unexpected error in Is Down Flip");
+  }
+#endif
   if(red_or_blue[down_position] == turn) return false;
  
   const Card& down_card = GetCard(down_position);
@@ -442,12 +584,22 @@ bool Board::IsDownFlip(const Card& card, int position) const{
 
 bool Board::IsLeftFlip(const Card& card, int position) const{
 #ifndef NDEBUG
-  if(position < 0 or 9 < position) throw std::runtime_error("position out of range in IsLeftFlip(Card&, int)\n");
+  if(position < 0 or 8 < position) throw std::runtime_error("position out of range in IsLeftFlip(Card&, int)\n");
 #endif
   if(position % 3 == 0) return false;
 
   int left_position = position - 1;
-  if(!IsOccupied(left_position)) return false;
+#ifndef NDEBUG
+  try{
+#endif
+    if(!IsOccupied(left_position)) return false;
+#ifndef NDEBUG
+  }
+  catch(std::runtime_error& e){
+    std::cerr << e.what() << std::endl;
+    throw std::runtime_error("Unexpected Error in IsLeftFlip");
+  }
+#endif
   if(red_or_blue[left_position] == turn) return false;
   
   const Card& left_card = GetCard(left_position);
@@ -461,12 +613,26 @@ bool Board::IsLeftFlip(const Card& card, int position) const{
 
 bool Board::IsRightFlip(const Card& card, int position) const{
 #ifndef NDEBUG
-  if(position < 0 or 9 < position) throw std::runtime_error("position out of range in IsRightFlip(Card&, int)\n");
+  if(position < 0 or 8 < position) throw std::runtime_error("position out of range in IsRightFlip(Card&, int)\n");
 #endif
   if(position % 3 == 2) return false;
 
   int right_position = position + 1;
-  if(!IsOccupied(right_position)) return false;
+#ifndef NDEBUG
+  try{
+#endif
+    if(!IsOccupied(right_position)) return false;
+#ifndef NDEBUG
+  }
+  catch(std::runtime_error& e){
+    std::cerr << e.what() << std::endl;
+    std::string msg("Unexpected Error in IsRightFlip right_position = ");
+    msg += std::to_string(right_position);
+    msg += ", position = ";
+    msg += std::to_string(position);
+    throw std::runtime_error(msg);
+  }
+#endif
   if(red_or_blue[right_position] == turn) return false;
   
   const Card& right_card = GetCard(right_position);
@@ -479,12 +645,12 @@ bool Board::IsRightFlip(const Card& card, int position) const{
 
 void Board::UpFlip(int position){
 #ifndef NDEBUG
-  if(position < 0 or 9 < position) throw std::runtime_error("position out of range in UpFlip(int)\n");
+  if(position < 0 or 8 < position) throw std::runtime_error("position out of range in UpFlip(int)\n");
 #endif
   int up_position = position - 3;
 
 #ifndef NDEBUG
-  if(up_position < 0 or 9 < up_position) throw std::runtime_error("position out of range in UpFlip(int)\n");
+  if(up_position < 0 or 8 < up_position) throw std::runtime_error("position out of range in UpFlip(int)\n");
   if(red_or_blue[up_position] == turn) throw std::runtime_error("Board information conflict in UpFlip(int)");
 #endif
   red_or_blue[up_position] = turn;
@@ -500,12 +666,12 @@ void Board::UpFlip(int position){
 
 void Board::DownFlip(int position){
 #ifndef NDEBUG
-  if(position < 0 or 9 < position) throw std::runtime_error("position out of range in DownFlip(int)\n");
+  if(position < 0 or 8 < position) throw std::runtime_error("position out of range in DownFlip(int)\n");
 #endif
   int down_position = position + 3;
 
 #ifndef NDEBUG
-  if(down_position < 0 or 9 < down_position) throw std::runtime_error("position out of range in DownFlip(int)\n");
+  if(down_position < 0 or 8 < down_position) throw std::runtime_error("position out of range in DownFlip(int)\n");
   if(red_or_blue[down_position] == turn) throw std::runtime_error("Board information conflict in DownFlip(int)");
 #endif
   red_or_blue[down_position] = turn;
@@ -521,12 +687,12 @@ void Board::DownFlip(int position){
 
 void Board::RightFlip(int position){
 #ifndef NDEBUG
-  if(position < 0 or 9 < position) throw std::runtime_error("position out of range in RightFlip(int)\n");
+  if(position < 0 or 8 < position) throw std::runtime_error("position out of range in RightFlip(int)\n");
 #endif
   int right_position = position + 1;
 
 #ifndef NDEBUG
-  if(right_position < 0 or 9 < right_position) throw std::runtime_error("position out of range in RightFlip(int)\n");
+  if(right_position < 0 or 8 < right_position) throw std::runtime_error("position out of range in RightFlip(int)\n");
   if(right_position % 3 == 0) throw std::runtime_error("position out of range in RightFlip(int)\n");
   if(red_or_blue[right_position] == turn) throw std::runtime_error("Board information conflict in RightFlip(int)");
 #endif
@@ -543,12 +709,12 @@ void Board::RightFlip(int position){
 
 void Board::LeftFlip(int position){
 #ifndef NDEBUG
-  if(position < 0 or 9 < position) throw std::runtime_error("position out of range in LeftFlip(int)\n");
+  if(position < 0 or 8 < position) throw std::runtime_error("position out of range in LeftFlip(int)\n");
 #endif
   int left_position = position - 1;
 
 #ifndef NDEBUG
-  if(left_position < 0 or 9 < left_position) throw std::runtime_error("position out of range in LeftFlip(int)\n");
+  if(left_position < 0 or 8 < left_position) throw std::runtime_error("position out of range in LeftFlip(int)\n");
   if(left_position % 3 == 2) throw std::runtime_error("position out of range in LeftFlip(int)\n");
   if(red_or_blue[left_position] == turn) throw std::runtime_error("Board information conflict in LeftFlip(int)");
 #endif
@@ -565,7 +731,7 @@ void Board::LeftFlip(int position){
 
 void Board::NormalFlip(const Card& card, int position){
 #ifndef NDEBUG
-  if(position < 0 or 9 < position) throw std::runtime_error("position out of range in NormalFlip(Card&, int)\n");
+  if(position < 0 or 8 < position) throw std::runtime_error("position out of range in NormalFlip(Card&, int)\n");
 #endif
   if(IsUpFlip(card, position)) UpFlip(position);
   if(IsDownFlip(card, position)) DownFlip(position);
@@ -574,7 +740,7 @@ void Board::NormalFlip(const Card& card, int position){
 }
 
 void Board::CascadeFlip(int position){
-  if(position < 0 or 9 < position) return;
+  if(position < 0 or 8 < position) return;
   if(!IsOccupied(position)) return;
   if(red_or_blue[position] == turn) return;
 
@@ -660,42 +826,50 @@ void Board::CascadeWithFlag(int position, int cascade_flag){
 
 int Board::SameFlag(const Card& card, int position) const{
 #ifndef NDEBUG
-  if(position < 0 or 9 < position) throw std::runtime_error("position out of range in SameFlag(Card&, int)\n");
+  if(position < 0 or 8 < position) throw std::runtime_error("position out of range in SameFlag(Card&, int)\n");
 #endif
   if(!IsEnableSame()) return 0;
   int up_card_num = 0;
   int down_card_num = 0;
   int right_card_num = 0;
   int left_card_num = 0;
-
-  if(position > 2){
-    if(IsOccupied(position - 3))
-      up_card_num = GetCard(position - 3).GetDown();
+#ifndef NDEBUG
+  try{
+#endif
+    if(position > 2){
+      if(IsOccupied(position - 3))
+	up_card_num = GetCard(position - 3).GetDown();
+    }
+    else if(IsEnableWallSame())
+      up_card_num = 10;
+    
+    if(position < 6){
+      if(IsOccupied(position + 3))
+	down_card_num = GetCard(position + 3).GetUp();
+    }
+    else if(IsEnableWallSame())
+      down_card_num = 10;
+    
+    if(position % 3 != 2){
+      if(IsOccupied(position + 1))
+	right_card_num = GetCard(position + 1).GetLeft();
+    }
+    else if(IsEnableWallSame())
+      right_card_num = 10;
+    
+    if(position % 3 != 0){
+      if(IsOccupied(position - 1))
+	left_card_num = GetCard(position - 1).GetRight();
+    }
+    else if(IsEnableWallSame())
+      left_card_num = 10;
+#ifndef NDEBUG
   }
-  else if(IsEnableWallSame())
-    up_card_num = 10;
-
-  if(position < 6){
-    if(IsOccupied(position + 3))
-      down_card_num = GetCard(position + 3).GetUp();
+  catch(std::runtime_error& e){
+    std::cout << e.what() << std::endl;
+    throw std::runtime_error("in SameFlag Unexpected Error");
   }
-  else if(IsEnableWallSame())
-    down_card_num = 10;
-
-  if(position % 3 != 2){
-    if(IsOccupied(position + 1))
-      right_card_num = GetCard(position + 1).GetLeft();
-  }
-  else if(IsEnableWallSame())
-    right_card_num = 10;
-
-  if(position % 3 != 0){
-    if(IsOccupied(position - 1))
-      left_card_num = GetCard(position - 1).GetRight();
-  }
-  else if(IsEnableWallSame())
-    left_card_num = 10;
-
+#endif
   bool up_same    = (up_card_num == card.GetUp());
   bool right_same = (right_card_num == card.GetRight());
   bool left_same  = (left_card_num == card.GetLeft());
@@ -728,26 +902,38 @@ int Board::SameFlag(const Card& card, int position) const{
 
 int Board::PlusFlag(const Card& card, int position) const{
 #ifndef NDEBUG
-  if(position < 0 or 9 < position) throw std::runtime_error("position out of range in PlusFlag(Card&, int)\n");
+  if(position < 0 or 8 < position) throw std::runtime_error("position out of range in PlusFlag(Card&, int)\n");
 #endif
   if(!IsEnablePlus()) return 0;
   int up_card_num = 0;
   int down_card_num = 0;
   int right_card_num = 0;
   int left_card_num = 0;
-
-  if(position > 2 and IsOccupied(position - 3))
-    up_card_num = GetCard(position - 3).GetDown();
-
-  if(position < 6 and IsOccupied(position + 3))
-    down_card_num = GetCard(position + 3).GetUp();
-
-  if(position % 3 != 2 and IsOccupied(position + 1))
-    right_card_num = GetCard(position + 1).GetLeft();
-
-  if(position % 3 != 0 and IsOccupied(position - 1))
-    left_card_num = GetCard(position - 1).GetRight();
-  
+#ifndef NDEBUG
+  try{
+#endif
+    if(position > 2)
+      if(IsOccupied(position - 3))
+	up_card_num = GetCard(position - 3).GetDown();
+    
+    if(position < 6)
+      if(IsOccupied(position + 3))
+	down_card_num = GetCard(position + 3).GetUp();
+    
+    if(position % 3 != 2)
+      if(IsOccupied(position + 1))
+	right_card_num = GetCard(position + 1).GetLeft();
+    
+    if(position % 3 != 0)
+      if(IsOccupied(position - 1))
+	left_card_num = GetCard(position - 1).GetRight();
+#ifndef NDEBUG
+  }
+  catch(std::runtime_error& e){
+    std::cout << e.what() << std::endl;
+    throw std::runtime_error("in PlusFlag Unexpected Error");
+  }
+#endif
   int up_sum    = up_card_num + card.GetUp();
   int down_sum  = down_card_num + card.GetDown();
   int right_sum = right_card_num + card.GetRight();

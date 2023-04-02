@@ -7,9 +7,10 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 include(GoogleTest)
 
-add_executable(test.exe test.cpp)
 add_executable(playtest.exe play-test.cpp)
-target_link_libraries(test.exe TripleTriad)
+add_executable(evaltest.exe eval-test.cpp)
 target_link_libraries(playtest.exe TripleTriad gtest_main)
+target_link_libraries(evaltest.exe TripleTriad gtest_main)
 
 add_test(NAME PlayTest COMMAND playtest.exe)
+add_test(NAME LongTest COMMAND evaltest.exe)

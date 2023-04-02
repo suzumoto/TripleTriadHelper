@@ -21,6 +21,14 @@ Rules::Rules(bool open, bool sd, bool rh, bool same, bool plus, bool wsame, bool
   }
 }
 
+Rules::Rules(const Rules& rules):
+  num_enable_rules(rules.num_enable_rules)
+{
+  for(int i = 0; i < num_total_rules; ++i){
+    enable_list[i] = rules.enable_list[i];
+  }
+}
+
 void Rules::EnableOpen(){
   if(!enable_list[OPEN]) ++num_enable_rules;
   enable_list[OPEN] = true;

@@ -31,17 +31,23 @@ private:
 public:
   Board(enum CardID ally_card_list[5], enum CardID opponent_card_list[5], Rules, enum Player turn);
   Board(enum CardID ally_card_list[5], enum CardID opponent_card_list[5], Rules, enum Player turn, enum Element element_list[9]);
+  Board(const Board& board);
   ~Board(){};
   void SetElement(enum Element el, int position);
   enum Element GetElement(int position) const;
   bool IsOccupied(int position) const;
   bool IsGameEnd() const;
   enum Player GetTurnPlayer() const;
+  const std::vector<enum CardID>& GetAllyCardList() const{return ally_card_list;};
+  const std::vector<enum CardID>& GetOpponentCardList() const{return opponent_card_list;};
+  const std::vector<enum CardID>& GetTurnPlayerCardList() const;
   enum Player GetWinner() const;
   const Card& GetCard(int position) const;
   void SetTurn(enum Player player);
   void Play(int index, int position);
   void ForceCardOnBoard(enum Player srcPlayer, int index, int position, enum Player dstPlayer);
+  int MoveEval(int index, int position) const; // -1 lose, 0 draw, 1 win
+  int MoveEval(int index, int position, long& count) const; // -1 lose, 0 draw, 1 win
   friend std::ostream& operator<<(std::ostream& os, const Board& board);
   friend bool operator==(const Board& rhs, const Board& lhs);
   friend bool operator!=(const Board& rhs, const Board& lhs){return !(rhs == lhs);}
