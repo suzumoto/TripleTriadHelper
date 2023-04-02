@@ -138,6 +138,8 @@ enum CardID{
 };
 
 CardID& operator++(CardID& id);
+CardID int_to_cardID(int id);
+
 
 class Card{
 private:

@@ -16,6 +16,15 @@ CardID& operator++(CardID& id){
   return id;
 }
 
+CardID int_to_cardID(int id){
+  if(id < 100) return NullCard;
+  int sub_id = id%100;
+  int level  = id/100;
+  if(sub_id == 0 or sub_id >= 12) return NullCard;
+  if(level == 0 or level >= 11) return NullCard;
+  return (CardID)id;
+}
+
 Card::Card(){
   id = NullCard;
   element = None;

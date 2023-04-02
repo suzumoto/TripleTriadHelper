@@ -1,8 +1,8 @@
 #pragma once
 #include <vector>
+#include <utility>
 #include <Rules.hpp>
 #include <CardData.hpp>
-
 enum Player{
   Unoccupied,
   Ally,
@@ -48,6 +48,7 @@ public:
   void ForceCardOnBoard(enum Player srcPlayer, int index, int position, enum Player dstPlayer);
   int MoveEval(int index, int position) const; // -1 lose, 0 draw, 1 win
   int MoveEval(int index, int position, long& count) const; // -1 lose, 0 draw, 1 win
+  std::pair<int, int> BestSearch() const;
   friend std::ostream& operator<<(std::ostream& os, const Board& board);
   friend bool operator==(const Board& rhs, const Board& lhs);
   friend bool operator!=(const Board& rhs, const Board& lhs){return !(rhs == lhs);}
