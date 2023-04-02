@@ -145,17 +145,13 @@ void Board::Play(int index, int position){
   else{
     if(index < 0 or opponent_card_list.size() <= index) throw std::runtime_error("card index out of range in Play(int, int)\n");
   }
-#ifndef NDEBUG
   try{
-#endif
     if(IsOccupied(position)) throw std::runtime_error("The place is already occupied. Play(int, int)\n");
-#ifndef NDEBUG
   }
   catch(std::runtime_error& e){
     std::cout << e.what() << std::endl;
     throw std::runtime_error("Unexpected Error in Play");
   }
-#endif
   if(IsGameEnd()) throw std::runtime_error("The game is end. Play(int, int)\n");
 #endif
 
