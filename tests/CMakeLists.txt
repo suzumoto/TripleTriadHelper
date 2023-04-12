@@ -9,8 +9,11 @@ include(GoogleTest)
 
 add_executable(playtest.exe play-test.cpp)
 add_executable(evaltest.exe eval-test.cpp)
+add_executable(io-test.exe io-test.cpp)
 target_link_libraries(playtest.exe TripleTriad gtest_main)
 target_link_libraries(evaltest.exe TripleTriad gtest_main)
+target_link_libraries(io-test.exe TripleTriad gtest_main)
 
 add_test(NAME PlayTest COMMAND playtest.exe)
 add_test(NAME LongTest COMMAND evaltest.exe)
+add_test(NAME IO-Test COMMAND io-test.exe)

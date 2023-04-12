@@ -2,15 +2,22 @@
 #include <Board.hpp>
 #include <CardData.hpp>
 #include <Rules.hpp>
+#include <io-util.hpp>
 
 int main(int argc, char* argv[]){
   enum CardID ally_card_list[5]{NullCard, NullCard, NullCard, NullCard, NullCard};
   enum CardID opponent_card_list[5]{NullCard, NullCard, NullCard, NullCard, NullCard};
+  io_util util;
   for(int i = 0; i < 5; ++i){
     std::cout << "Input Ally CardID #" << i+1 << std::endl;
-    int int_id;
-    std::cin >> int_id;
-    CardID id = int_to_cardID(int_id);
+    std::string input;
+    std::cin >> input;
+    if(util.cardnum_to_id.find(input) == util.cardnum_to_id.end()){
+      std::cout << "Wrong Input." << std::endl;
+      --i;
+      continue;
+    }	      
+    CardID id = util.cardnum_to_id[input];
     if(id == NullCard){
       std::cout << "Wrong Input." << std::endl;
       --i;
@@ -20,9 +27,14 @@ int main(int argc, char* argv[]){
   }
   for(int i = 0; i < 5; ++i){
     std::cout << "Input Opponent CardID #" << i+1 << std::endl;
-    int int_id;
-    std::cin >> int_id;
-    CardID id = int_to_cardID(int_id);
+    std::string input;
+    std::cin >> input;
+    if(util.cardnum_to_id.find(input) == util.cardnum_to_id.end()){
+      std::cout << "Wrong Input." << std::endl;
+      --i;
+      continue;
+    }
+    CardID id = util.cardnum_to_id[input];
     if(id == NullCard){
       std::cout << "Wrong Input." << std::endl;
       --i;
@@ -55,9 +67,12 @@ int main(int argc, char* argv[]){
     std::cin >> index;
     if(index == 9999){
       std::pair<int, int> move = gameboard.BestSearch();
-      if(move.first == -1)
-	std::cout << "Possibly Lose" << std::endl;
+      if(move.first == -1){
+	std::cout << "Lose " << std::endl;
+	continue;
+      }
       std::cout << "Best Move = (" << move.first << ", " << move.second << ")" << std::endl;
+      gameboard.Play(move.first, move.second);
       continue;
     }
     int num_turn_playercard = ((gameboard.GetTurnPlayer() == Ally)?gameboard.GetAllyCardList().size():gameboard.GetOpponentCardList().size());
@@ -72,5 +87,6 @@ int main(int argc, char* argv[]){
     }
     gameboard.Play(index, position);
   }
+  std::cout << gameboard << std::endl;
   return 0;
 }

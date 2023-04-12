@@ -318,9 +318,15 @@ std::pair<int, int> Board::BestSearch() const{
   for(int card_index = 0; card_index < player_card_list.size(); ++card_index){
     for(int empty_position: empty_list){
       int move_eval = MoveEval(card_index, empty_position);
-      if(move_eval == 1) return std::make_pair(card_index, empty_position);
+      if(move_eval == 1){
+	std::cout << "Win" << std::endl;
+	return std::make_pair(card_index, empty_position);
+      }
       if(move_eval == 0) draw_move = std::make_pair(card_index, empty_position);
     }
+  }
+  if(draw_move.first != -1){
+    std::cout << "Draw" << std::endl;
   }
   return draw_move;
 }
