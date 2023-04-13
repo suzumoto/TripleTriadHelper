@@ -8,6 +8,7 @@ int main(int argc, char* argv[]){
   enum CardID ally_card_list[5]{NullCard, NullCard, NullCard, NullCard, NullCard};
   enum CardID opponent_card_list[5]{NullCard, NullCard, NullCard, NullCard, NullCard};
   io_util util;
+  CardData card_data;
   for(int i = 0; i < 5; ++i){
     std::cout << "Input Ally CardID #" << i+1 << std::endl;
     std::string input;
@@ -59,7 +60,7 @@ int main(int argc, char* argv[]){
     else sente = Opponent;
     break;
   }
-  Board gameboard(ally_card_list, opponent_card_list, rule, sente);
+  Board gameboard(ally_card_list, opponent_card_list, rule, sente, card_data);
   while(!gameboard.IsGameEnd()){
     std::cout << gameboard << std::endl;
     std::cout << "input Move(index, position) or Search(9999)" << std::endl;

@@ -10,8 +10,8 @@ TEST(EvalTest, CASE1_Plus){
   
   enum Player turn = Ally;
   Rules rule(true, false, false, false, true, false, false); // Plus
-  
-  Board test_board1(ally_card_list, opponent_card_list, rule, turn);
+  CardData card_data;
+  Board test_board1(ally_card_list, opponent_card_list, rule, turn, card_data);
   
   test_board1.ForceCardOnBoard(Ally, 0, 0, Ally);
   test_board1.ForceCardOnBoard(Ally, 0, 1, Ally);
@@ -31,8 +31,8 @@ TEST(EvalTest, CASE2){
   enum Player turn = Ally;
   
   Rules rule(true, false, false, false, false, false, false);
-
-  Board test_board(ally_card_list, opponent_card_list, rule, turn);
+  CardData card_data;
+  Board test_board(ally_card_list, opponent_card_list, rule, turn, card_data);
   test_board.Play(1,0);
   test_board.Play(0,1);
   test_board.Play(1,6);
@@ -49,8 +49,8 @@ TEST(EvalTest, CASE3){
   enum Player turn = Ally;
   
   Rules rule(true, false, false, false, false, false, false);
-
-  Board test_board(ally_card_list, opponent_card_list, rule, turn);
+  CardData card_data;
+  Board test_board(ally_card_list, opponent_card_list, rule, turn, card_data);
   test_board.Play(1,0);
   test_board.Play(0,1);
   test_board.Play(1,6);
@@ -65,8 +65,8 @@ TEST(EvalTest, CASE4){
   enum Player turn = Ally;
   
   Rules rule(true, false, false, false, false, false, false);
-
-  Board test_board(ally_card_list, opponent_card_list, rule, turn);
+  CardData card_data;
+  Board test_board(ally_card_list, opponent_card_list, rule, turn, card_data);
   test_board.Play(1,0);
   test_board.Play(0,1);
   std::cout << test_board << std::endl;
@@ -79,8 +79,8 @@ TEST(EvalTest, CASE5){
   enum Player turn = Ally;
   
   Rules rule(true, false, false, false, false, false, false);
-
-  Board test_board(ally_card_list, opponent_card_list, rule, turn);
+  CardData card_data;
+  Board test_board(ally_card_list, opponent_card_list, rule, turn, card_data);
   std::cout << test_board << std::endl;
   EXPECT_EQ(test_board.MoveEval(1,0), 1);
 }
@@ -91,8 +91,8 @@ TEST(EvalTest, CASE6){
   enum Player turn = Ally;
   
   Rules rule(true, false, false, false, false, false, false);
-  
-  Board test_board(ally_card_list, opponent_card_list, rule, turn);
+  CardData card_data;
+  Board test_board(ally_card_list, opponent_card_list, rule, turn, card_data);
   std::cout << test_board << std::endl;
   long count = 0;
   EXPECT_EQ(test_board.MoveEval(1,0,count), 0);
@@ -105,8 +105,8 @@ TEST(EvalTest, CASE7){
   enum Player turn = Ally;
   
   Rules rule(true, false, false, true, true, true, false);
-  
-  Board test_board(ally_card_list, opponent_card_list, rule, turn);
+  CardData card_data;
+  Board test_board(ally_card_list, opponent_card_list, rule, turn, card_data);
   std::cout << test_board << std::endl;
   long count = 0;
   EXPECT_EQ(test_board.MoveEval(1,0,count), 0);

@@ -1,7 +1,8 @@
 #include <Board.hpp>
 #include <string>
 
-Board::Board(enum CardID ally_card_list_[5], enum CardID opponent_card_list_[5], Rules rules_, enum Player turn_):
+Board::Board(enum CardID ally_card_list_[5], enum CardID opponent_card_list_[5], Rules rules_, enum Player turn_, const CardData& card_data_):
+  card_data(card_data_),
   rules(rules_),
   turn(turn_),
   sente(turn_),
@@ -21,7 +22,8 @@ Board::Board(enum CardID ally_card_list_[5], enum CardID opponent_card_list_[5],
   }
 }
 
-Board::Board(enum CardID ally_card_list_[5], enum CardID opponent_card_list_[5], Rules rules_, enum Player turn_, enum Element element_list_[9]):
+Board::Board(enum CardID ally_card_list_[5], enum CardID opponent_card_list_[5], Rules rules_, enum Player turn_, enum Element element_list_[9], const CardData& card_data_):
+  card_data(card_data),
   rules(rules_),
   turn(turn_),
   sente(turn_),
@@ -42,6 +44,7 @@ Board::Board(enum CardID ally_card_list_[5], enum CardID opponent_card_list_[5],
 }
 
 Board::Board(const Board& board):
+  card_data(board.card_data),
   rules(board.rules),
   turn(board.turn),
   sente(board.turn),
@@ -79,7 +82,7 @@ bool Board::IsOccupied(int position) const{
     std::string msg("position out of range in IsOccupied, position = ");
     msg += std::to_string(position);
     throw std::runtime_error(msg);
-  }
+  }o
   if(red_or_blue[position] != Unoccupied and card_list[position] == NullCard) throw std::runtime_error("card information conflicted\n");
   if(red_or_blue[position] == Unoccupied and card_list[position] != NullCard) throw std::runtime_error("card information conflicted\n");
 #endif

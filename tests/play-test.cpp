@@ -10,10 +10,11 @@ TEST(PlayTest, CASE1){
     
   enum CardID opponent_card_list[5]{Geezard, Funguar, BiteBug, RedBat, Blobra};
   enum Player turn = Ally;
+  CardData card_data;
   Rules rule(true, false, false, false, false, false, false);
 
-  Board test_board1(ally_card_list, opponent_card_list, rule, turn);
-  Board test_board2(ally_card_list, opponent_card_list, rule, turn);
+  Board test_board1(ally_card_list, opponent_card_list, rule, turn, card_data);
+  Board test_board2(ally_card_list, opponent_card_list, rule, turn, card_data);
   ASSERT_EQ(test_board1, test_board2);
 }
 
@@ -22,10 +23,11 @@ TEST(PlayTest, CASE2){
     
   enum CardID opponent_card_list[5]{Geezard, Funguar, BiteBug, RedBat, Blobra};
   enum Player turn = Ally;
+  CardData card_data;
   Rules rule(true, false, false, false, false, false, false);
 
-  Board test_board1(ally_card_list, opponent_card_list, rule, turn);
-  Board test_board2(ally_card_list, opponent_card_list, rule, turn);
+  Board test_board1(ally_card_list, opponent_card_list, rule, turn, card_data);
+  Board test_board2(ally_card_list, opponent_card_list, rule, turn, card_data);
   test_board1.Play(0, 0);
   test_board2.ForceCardOnBoard(Ally, 0, 0, Ally);
   test_board2.SetTurn(Opponent);
@@ -37,10 +39,11 @@ TEST(PlayTest, CASE3){
     
   enum CardID opponent_card_list[5]{Geezard, Funguar, BiteBug, RedBat, Blobra};
   enum Player turn = Ally;
+  CardData card_data;
   Rules rule(true, false, false, false, false, false, false);
 
-  Board test_board1(ally_card_list, opponent_card_list, rule, turn);
-  Board test_board2(ally_card_list, opponent_card_list, rule, turn);
+  Board test_board1(ally_card_list, opponent_card_list, rule, turn, card_data);
+  Board test_board2(ally_card_list, opponent_card_list, rule, turn, card_data);
   test_board1.Play(0, 0);
   test_board1.Play(1, 3);
   test_board2.ForceCardOnBoard(Ally, 0, 0, Opponent);
@@ -53,10 +56,11 @@ TEST(PlayTest, CASE4_Plus){
   enum CardID opponent_card_list[5]{TonberryKing, Malboro, Ochu, Jelleye, Gerogero};
 
   enum Player turn = Ally;
+  CardData card_data;
   Rules rule(true, false, false, false, true, false, false); // Plus
   
-  Board test_board1(ally_card_list, opponent_card_list, rule, turn);
-  Board test_board2(ally_card_list, opponent_card_list, rule, turn);
+  Board test_board1(ally_card_list, opponent_card_list, rule, turn, card_data);
+  Board test_board2(ally_card_list, opponent_card_list, rule, turn, card_data);
 
   test_board1.ForceCardOnBoard(Ally, 0, 0, Ally);
   test_board1.ForceCardOnBoard(Ally, 0, 1, Ally);
@@ -88,9 +92,9 @@ TEST(PlayTest, CASE5_Same){
 
   enum Player turn = Ally;
   Rules rule(true, false, false, true, false, false, false); // Same
-  
-  Board test_board1(ally_card_list, opponent_card_list, rule, turn);
-  Board test_board2(ally_card_list, opponent_card_list, rule, turn);
+  CardData card_data;
+  Board test_board1(ally_card_list, opponent_card_list, rule, turn, card_data);
+  Board test_board2(ally_card_list, opponent_card_list, rule, turn, card_data);
 
   test_board1.ForceCardOnBoard(Ally, 0, 0, Ally);
   test_board1.ForceCardOnBoard(Ally, 0, 1, Ally);
@@ -122,9 +126,9 @@ TEST(PlayTest, CASE6_WallSame){
 
   enum Player turn = Ally;
   Rules rule(true, false, false, true, false, true, false); // Same and WallSame
-  
-  Board test_board1(ally_card_list, opponent_card_list, rule, turn);
-  Board test_board2(ally_card_list, opponent_card_list, rule, turn);
+  CardData card_data;
+  Board test_board1(ally_card_list, opponent_card_list, rule, turn, card_data);
+  Board test_board2(ally_card_list, opponent_card_list, rule, turn, card_data);
 
   test_board1.ForceCardOnBoard(Ally, 0, 0, Ally);
   test_board1.ForceCardOnBoard(Ally, 0, 1, Ally);
@@ -157,8 +161,9 @@ TEST(PlayTest, CASE7_Elemental){
   enum Player turn = Ally;
   Rules rule(true, false, false, false, true, false, true); // Plus and Elemental
   enum Element elem_list[9]{None, None, Poison, None, None, None, None, None, None};
-  Board test_board1(ally_card_list, opponent_card_list, rule, turn, elem_list);
-  Board test_board2(ally_card_list, opponent_card_list, rule, turn);
+  CardData card_data;
+  Board test_board1(ally_card_list, opponent_card_list, rule, turn, elem_list, card_data);
+  Board test_board2(ally_card_list, opponent_card_list, rule, turn, card_data);
   test_board2.SetElement(Poison, 2);
   
   test_board1.ForceCardOnBoard(Ally, 0, 0, Ally);

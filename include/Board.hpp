@@ -11,7 +11,7 @@ enum Player{
 
 class Board{
 private:
-  CardData card_data;
+  const CardData& card_data;
   const int num_positions = 9;
   Rules rules;
   enum Element element_list[9];
@@ -29,8 +29,8 @@ private:
   std::vector<enum CardID> opponent_card_list;
   
 public:
-  Board(enum CardID ally_card_list[5], enum CardID opponent_card_list[5], Rules, enum Player turn);
-  Board(enum CardID ally_card_list[5], enum CardID opponent_card_list[5], Rules, enum Player turn, enum Element element_list[9]);
+  Board(enum CardID ally_card_list[5], enum CardID opponent_card_list[5], Rules, enum Player turn, const CardData& card_data);
+  Board(enum CardID ally_card_list[5], enum CardID opponent_card_list[5], Rules, enum Player turn, enum Element element_list[9], const CardData& card_data);
   Board(const Board& board);
   ~Board(){};
   void SetElement(enum Element el, int position);
