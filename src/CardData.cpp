@@ -79,7 +79,7 @@ CardData::CardData(){
   card_list[list_iterator++] = Card(++id_iterator,3,2,1,7,None);
   card_list[list_iterator++] = Card(++id_iterator,5,2,5,3,None);
   card_list[list_iterator++] = Card(++id_iterator,6,6,3,2,None);
-  card_list[list_iterator++] = Card(++id_iterator,6,6,3,1,Ground);
+  card_list[list_iterator++] = Card(++id_iterator,6,3,1,6,Ground);
   card_list[list_iterator++] = Card(++id_iterator,3,5,5,5,Poison);
   card_list[list_iterator++] = Card(++id_iterator,7,5,1,3,Ground);
   card_list[list_iterator++] = Card(++id_iterator,7,1,5,3,Cold);
