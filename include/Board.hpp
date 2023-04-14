@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <utility>
+#include <unordered_map>
 #include <Rules.hpp>
 #include <CardData.hpp>
 enum Player{
@@ -43,12 +44,14 @@ public:
   const std::vector<enum CardID>& GetTurnPlayerCardList() const;
   enum Player GetWinner() const;
   const Card& GetCard(int position) const;
+  long GetBoardHash() const;
   void SetTurn(enum Player player);
   void Play(int index, int position);
   void ForceCardOnBoard(enum Player srcPlayer, int index, int position, enum Player dstPlayer);
   int MoveEval(int index, int position) const; // -1 lose, 0 draw, 1 win
   int MoveEval(int index, int position, long& count) const; // -1 lose, 0 draw, 1 win
-  std::pair<int, int> BestSearch() const;
+  int MoveEval(int index, int position, std::unordered_map<long, int>& already_searched_list) const;
+  std::pair<int, int> BestSearch(std::unordered_map<long, int>& already_searched_list) const;
   friend std::ostream& operator<<(std::ostream& os, const Board& board);
   friend bool operator==(const Board& rhs, const Board& lhs);
   friend bool operator!=(const Board& rhs, const Board& lhs){return !(rhs == lhs);}

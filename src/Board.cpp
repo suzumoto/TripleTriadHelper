@@ -82,7 +82,7 @@ bool Board::IsOccupied(int position) const{
     std::string msg("position out of range in IsOccupied, position = ");
     msg += std::to_string(position);
     throw std::runtime_error(msg);
-  }o
+  }
   if(red_or_blue[position] != Unoccupied and card_list[position] == NullCard) throw std::runtime_error("card information conflicted\n");
   if(red_or_blue[position] == Unoccupied and card_list[position] != NullCard) throw std::runtime_error("card information conflicted\n");
 #endif
@@ -133,6 +133,27 @@ const Card& Board::GetCard(int position) const{
   if(position < 0 or 8 < position) throw std::runtime_error("position out of range in GetCard(int)\n");
 #endif
   return card_data[card_list[position]];
+}
+
+long Board::GetBoardHash() const{
+#ifndef NDEBUG
+  //if(num_unoccupied_positions < 4) throw std::runtime_error("Do not call GetBoardHash when unoccupied positions < 4.");
+#endif
+  long hash = 0;
+  int num_card = 0;
+  for(int i = 0; i < num_positions; ++i){
+    if(IsOccupied(i)){
+      int id = (int)GetCard(i).GetCardID();
+      int level = id/100-1;
+      int rem = (id%100)-1;
+      int colour = (red_or_blue[i]==Ally ? 0 : 1);
+      long hash_loc = (i << 8) | ((level*11+rem) << 1) | colour;
+      hash_loc <<= ((num_card*12)%52);
+      hash ^= hash_loc; 
+      ++num_card;
+    }
+  }
+  return hash;
 }
 
 void Board::SetTurn(enum Player player){
@@ -310,7 +331,64 @@ int Board::MoveEval(int index, int position, long& count) const{
   else return 0;
 }
 
-std::pair<int, int> Board::BestSearch() const{
+int Board::MoveEval(int index, int position, std::unordered_map<long, int>& already_searched_list) const{
+#ifndef NDEBUG
+  if(IsGameEnd()) throw std::runtime_error("Do not call MoveEval on a final board");
+#endif
+  Board next_board(*this);
+  next_board.Play(index, position);
+  if(next_board.IsGameEnd()){
+    if(next_board.GetWinner() == Unoccupied) return 0; // Draw
+    if(next_board.GetWinner() == GetTurnPlayer()) return 1; // Win
+    else return -1; // Lose
+  }
+  bool is_hashable = (next_board.num_unoccupied_positions >= 4);
+  long next_hash = 0;
+  if(is_hashable){
+    next_hash = next_board.GetBoardHash();
+    if(already_searched_list.find(next_hash) != already_searched_list.end()){
+      return already_searched_list[next_hash];
+    }
+  }
+  std::vector<int> empty_list;
+#ifndef NDEBUG
+  try{
+#endif
+    for(int i = 0; i < num_positions; ++i){
+      if(!next_board.IsOccupied(i))
+	empty_list.push_back(i);
+    }
+#ifndef NDEBUG
+  }
+  catch(std::runtime_error& e){
+    std::cout << e.what() << std::endl;
+    throw std::runtime_error("Unexpected Error in Move Eval(int, int)");
+  }
+#endif
+  const std::vector<enum CardID>& hand_list = next_board.GetTurnPlayerCardList();
+  int eval_sum = 0;
+  for(int card_index = 0; card_index < hand_list.size(); ++card_index){
+    for(int empty_position: empty_list){
+      int eval = next_board.MoveEval(card_index, empty_position, already_searched_list);
+      if(eval == 1){
+	if(is_hashable)
+	  already_searched_list.insert(std::make_pair(next_hash, -1));
+	return -1;
+      }
+      eval_sum += eval;
+    }
+  }
+  if(-eval_sum == hand_list.size() * empty_list.size()){
+    if(is_hashable)
+      already_searched_list.insert(std::make_pair(next_hash, 1));
+    return 1;
+  }
+  if(is_hashable)
+    already_searched_list.insert(std::make_pair(next_hash, 0));
+  return 0;
+}
+
+std::pair<int, int> Board::BestSearch(std::unordered_map<long, int>& already_searched_list) const{
   std::vector<int> empty_list;
   for(int i = 0; i < num_positions; ++i){
     if(!IsOccupied(i))
@@ -320,7 +398,7 @@ std::pair<int, int> Board::BestSearch() const{
   std::pair<int, int> draw_move = std::make_pair(-1, -1);
   for(int card_index = 0; card_index < player_card_list.size(); ++card_index){
     for(int empty_position: empty_list){
-      int move_eval = MoveEval(card_index, empty_position);
+      int move_eval = MoveEval(card_index, empty_position, already_searched_list);
       if(move_eval == 1){
 	std::cout << "Win" << std::endl;
 	return std::make_pair(card_index, empty_position);

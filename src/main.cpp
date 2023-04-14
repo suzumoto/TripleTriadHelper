@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono>
 #include <Board.hpp>
 #include <CardData.hpp>
 #include <Rules.hpp>
@@ -9,6 +10,7 @@ int main(int argc, char* argv[]){
   enum CardID opponent_card_list[5]{NullCard, NullCard, NullCard, NullCard, NullCard};
   io_util util;
   CardData card_data;
+  std::unordered_map<long, int> already_searched_list;
   for(int i = 0; i < 5; ++i){
     std::cout << "Input Ally CardID #" << i+1 << std::endl;
     std::string input;
@@ -67,7 +69,11 @@ int main(int argc, char* argv[]){
     int index, position;
     std::cin >> index;
     if(index == 9999){
-      std::pair<int, int> move = gameboard.BestSearch();
+      auto start = std::chrono::high_resolution_clock::now();
+      std::pair<int, int> move = gameboard.BestSearch(already_searched_list);
+      auto end = std::chrono::high_resolution_clock::now();
+      double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+      std::cout << "time elapsed for search = " << elapsed << " m sec." << std::endl;
       if(move.first == -1){
 	std::cout << "Lose " << std::endl;
 	continue;
