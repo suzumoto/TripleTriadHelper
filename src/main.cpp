@@ -45,8 +45,17 @@ int main(int argc, char* argv[]){
     }
     opponent_card_list[i] = int_to_cardID(id);
   }
-  Rules rule(true, false, false, false, false, false, false);
-  std::cout << "Rules: Open" << std::endl;
+  int is_enable_same, is_enable_plus, is_enable_wallsame;
+  std::cout << "Same Enable? 0:disable, 1: enable" << std::endl;
+  std::cin >> is_enable_same;
+  std::cout << "Plus Enable? 0:disable, 1: enable" << std::endl;
+  std::cin >> is_enable_plus;
+  std::cout << "Wallsame Enable? 0:disable, 1: enable" << std::endl;
+  std::cin >> is_enable_wallsame;
+  
+  
+  Rules rule(true, false, false, is_enable_same, is_enable_plus, is_enable_wallsame, false);
+  std::cout << "Rules: Open, " << (is_enable_same?"Same, ":"") << (is_enable_plus?"Plus, ":"") << (is_enable_wallsame?"Wallsame":"") << std::endl;
   enum Player sente;
   while(true){
     std::cout << "Which has the first move? 0/Ally, 1/Opponent" << std::endl;
