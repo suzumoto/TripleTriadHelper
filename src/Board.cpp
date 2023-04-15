@@ -1006,10 +1006,10 @@ int Board::PlusFlag(const Card& card, int position) const{
   if(position < 0 or 8 < position) throw std::runtime_error("position out of range in PlusFlag(Card&, int)\n");
 #endif
   if(!IsEnablePlus()) return 0;
-  int up_card_num = 0;
-  int down_card_num = 0;
-  int right_card_num = 0;
-  int left_card_num = 0;
+  int up_card_num = -20;
+  int down_card_num = -40;
+  int right_card_num = -80;
+  int left_card_num = -100;
 #ifndef NDEBUG
   try{
 #endif

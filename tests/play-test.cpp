@@ -189,3 +189,32 @@ TEST(PlayTest, CASE7_Elemental){
   EXPECT_EQ(test_board1, test_board2);
   EXPECT_EQ(test_board1.GetWinner(), Opponent);
 }
+
+TEST(PlayTest, CASE8_Cascade){
+  
+  enum CardID ally_card_list[5]{UltimaWeapon, Carbuncle, Elastoid, Ochu, MiniMog};
+  enum CardID opponent_card_list[5]{WedgeBiggs, Funguar, FastitocalonF, DeathClaw, Ochu};
+  enum Player turn = Opponent;
+  CardData card_data;
+  Rules rule(true, false, false, true, true, false, false); // Same and Plus
+  Board test_board1(ally_card_list, opponent_card_list, rule, turn, card_data);
+  test_board1.Play(0, 0);
+  test_board1.Play(0, 7);
+  test_board1.Play(0, 1);
+  test_board1.Play(0, 6);
+  test_board1.Play(0, 2);
+  test_board1.Play(0, 3);
+  test_board1.Play(0, 4);
+  test_board1.Play(1, 8);
+
+  Board test_board2(ally_card_list, opponent_card_list, rule, turn, card_data);
+  test_board2.ForceCardOnBoard(Opponent, 0, 0, Opponent);
+  test_board2.ForceCardOnBoard(Opponent, 0, 1, Opponent);
+  test_board2.ForceCardOnBoard(Opponent, 0, 2, Opponent);
+  test_board2.ForceCardOnBoard(Opponent, 0, 4, Opponent);
+  test_board2.ForceCardOnBoard(Ally, 0, 7, Opponent);
+  test_board2.ForceCardOnBoard(Ally, 0, 6, Opponent);
+  test_board2.ForceCardOnBoard(Ally, 0, 3, Opponent);
+  test_board2.ForceCardOnBoard(Ally, 1, 8, Ally);
+  EXPECT_EQ(test_board1, test_board2);
+}
