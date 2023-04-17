@@ -52,6 +52,7 @@ public:
   int MoveEval(int index, int position, long& count) const; // -1 lose, 0 draw, 1 win
   int MoveEval(int index, int position, std::unordered_map<long, int>& already_searched_list) const;
   std::pair<int, int> BestSearch(std::unordered_map<long, int>& already_searched_list) const;
+  std::pair<int, int> BestSearch(std::unordered_map<long, int>& already_searched_list, int& eval) const;
   friend std::ostream& operator<<(std::ostream& os, const Board& board);
   friend bool operator==(const Board& rhs, const Board& lhs);
   friend bool operator!=(const Board& rhs, const Board& lhs){return !(rhs == lhs);}

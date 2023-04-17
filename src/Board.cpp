@@ -412,6 +412,30 @@ std::pair<int, int> Board::BestSearch(std::unordered_map<long, int>& already_sea
   return draw_move;
 }
 
+std::pair<int, int> Board::BestSearch(std::unordered_map<long, int>& already_searched_list, int& eval) const{
+  std::vector<int> empty_list;
+  for(int i = 0; i < num_positions; ++i){
+    if(!IsOccupied(i))
+      empty_list.push_back(i);
+  }
+  const std::vector<enum CardID>& player_card_list = ((turn == Ally)?ally_card_list:opponent_card_list);
+  std::pair<int, int> draw_move = std::make_pair(-1, -1);
+  for(int card_index = 0; card_index < player_card_list.size(); ++card_index){
+    for(int empty_position: empty_list){
+      int move_eval = MoveEval(card_index, empty_position, already_searched_list);
+      if(move_eval == 1){
+	eval = 1;
+	return std::make_pair(card_index, empty_position);
+      }
+      if(move_eval == 0) draw_move = std::make_pair(card_index, empty_position);
+    }
+  }
+  if(draw_move.first != -1)
+    eval = 0;
+  else eval = -1;
+  return draw_move;
+}
+
 static char int_to_char(int num){
   char char_num;
   if(num == 10) char_num = 'A';
